@@ -1,12 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const path = require('path');
 const app = express();
 
-// Use the PORT environment variable or default to 3000
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for all routes
 
 const urlDatabase = {};
 
@@ -31,7 +32,6 @@ app.get('/:shortId', (req, res) => {
     }
 });
 
-// Listen on the port specified by Heroku
 app.listen(port, () => {
     console.log(`URL Shortener service running at http://localhost:${port}`);
 });
