@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        input[type="url"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #28a745;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <input type="url" id="originalUrl" placeholder="Enter URL to shorten" required>
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        async function shortenUrl() {
+            const originalUrl = document.getElementById('originalUrl').value;
+            if (!originalUrl) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            try {
+                const response = await fetch('/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: originalUrl })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                document.getElementById('output').innerHTML = `
+                    <p>Original URL: <a href="${originalUrl}" target="_blank">${originalUrl}</a></p>
+                    <p>Shortened URL: <a href="${data.shortUrl}" target="_blank">${data.shortUrl}</a></p>
+                `;
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        }
+    </script>
+</body>
+</html>
