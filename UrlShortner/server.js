@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
-app.use(express.static('public'));
+app.use(express.static('Public'));
 
 // Function to generate short URL using crypto
 function generateShortUrl(length) {
