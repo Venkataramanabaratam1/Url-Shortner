@@ -1,37 +1,59 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const path = require('path');
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 const app = express();
+const PORT = 3000;
 
-const port = process.env.PORT || 3000;
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/urlShortener', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
 
-app.use(bodyParser.json());
-app.use(cors()); // Enable CORS for all routes
-
-const urlDatabase = [];
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Define URL Schema
+const urlSchema = new mongoose.Schema({
+    originalUrl: String,
+    shortUrl: String
 });
 
-app.post('/shorten', (req, res) => {
-    const originalUrl = req.body.url;
-    const shortId = Math.random().toString(36).substring(2, 8);
-    urlDatabase[shortId] = originalUrl;
-    res.json({ shortUrl: `${req.protocol}://${req.get('host')}/${shortId}` });
+const Url = mongoose.model('Url', urlSchema);
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use(express.static('public'));
+
+// Function to generate short URL using crypto
+function generateShortUrl(length) {
+    return crypto.randomBytes(length).toString('hex').slice(0, length);
+}
+
+// Create Short URL
+app.post('/shorten', async (req, res) => {
+    const { originalUrl } = req.body;
+    const shortUrl = generateShortUrl(6);
+
+    const newUrl = new Url({ originalUrl, shortUrl });
+    await newUrl.save();
+
+    res.send(`Short URL is: <a href="/${shortUrl}">${shortUrl}</a>`);
 });
 
-app.get('/:shortId', (req, res) => {
-    const shortId = req.params.shortId;
-    const originalUrl = urlDatabase[shortId];
-    if (originalUrl) {
-        res.redirect(originalUrl);
+// Redirect to Original URL
+app.get('/:shortUrl', async (req, res) => {
+    const { shortUrl } = req.params;
+    const urlData = await Url.findOne({ shortUrl });
+
+    if (urlData) {
+        res.redirect(urlData.originalUrl);
     } else {
-        res.status(404).send('URL not found');
+        res.send('URL not found');
     }
 });
 
-app.listen(port, () => {
-    console.log(`URL Shortener service running at http://localhost:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
