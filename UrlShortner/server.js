@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const path = require('path'); // Moved this import up for consistency
+const path = require('path');
 const app = express();
 const PORT = 3000;
 
@@ -29,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve the index.html file on the root route
 app.get('/', (req, res) => {
+    console.log('Root route accessed');
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
