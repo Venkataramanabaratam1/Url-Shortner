@@ -6,10 +6,8 @@ const app = express();
 const PORT = 3000;
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/urlShortener', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
+mongoose.connect('mongodb://localhost:27017/urlShortener')
+.then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
 // Define URL Schema
@@ -18,21 +16,19 @@ const urlSchema = new mongoose.Schema({
     shortUrl: String
 });
 
+// app.use(express.static('public'))
+
 const Url = mongoose.model('Url', urlSchema);
 
 // Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+ 
 
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve the index.html file on the root route
-app.get('/', (req, res) => {
-    console.log('Root route accessed');
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
+ 
 // Function to generate short URL using crypto
 function generateShortUrl(length) {
     return crypto.randomBytes(length).toString('hex').slice(0, length);
