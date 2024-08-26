@@ -1,9 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const path = require('path'); // Moved this import up for consistency
 const app = express();
 const PORT = 3000;
-const path=require('path')
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/urlShortener', {
@@ -20,18 +20,17 @@ const urlSchema = new mongoose.Schema({
 
 const Url = mongoose.model('Url', urlSchema);
 
-// Middleware to parse JSON bodies
+// Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static('public'));
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-path.join(__dirname,'public')
-
-app.get('/',(req,res)=>{
-    res.send('index.html')
-})
+// Serve the index.html file on the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Function to generate short URL using crypto
 function generateShortUrl(length) {
@@ -57,7 +56,7 @@ app.get('/:shortUrl', async (req, res) => {
     if (urlData) {
         res.redirect(urlData.originalUrl);
     } else {
-        res.send('URL not found');
+        res.status(404).send('URL not found');
     }
 });
 
