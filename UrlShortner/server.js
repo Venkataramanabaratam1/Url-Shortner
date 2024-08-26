@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const app = express();
 const PORT = 3000;
+const path=require('path')
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/urlShortener', {
@@ -24,7 +25,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
-app.use(express.static('Public'));
+app.use(express.static('public'));
+
+path.join(__dirname,'public')
 
 // Function to generate short URL using crypto
 function generateShortUrl(length) {
